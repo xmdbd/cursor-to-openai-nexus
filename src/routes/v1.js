@@ -309,67 +309,115 @@ router.post("/invalid-cookies", async (req, res) => {
 });
 
 router.get("/models", async (req, res) => {
-  try{
-    let bearerToken = req.headers.authorization?.replace('Bearer ', '');
-    
-    // 使用keyManager获取实际的cookie
+  try {
+    // 读取调用方提供的Bearer Token
+    const bearerToken = req.headers.authorization?.replace('Bearer ', '');
+
+    // 缺少授权时直接返回401，避免无意义的上游请求
+    if (!bearerToken || typeof bearerToken !== 'string' || bearerToken.trim().length === 0) {
+      return res.status(401).json({ error: 'Missing Authorization header' });
+    }
+
+    // 使用keyManager获取实际的cookie（可能与bearerToken相同）
     let authToken = keyManager.getCookieForApiKey(bearerToken);
-    
+
     if (authToken && authToken.includes('%3A%3A')) {
       authToken = authToken.split('%3A%3A')[1];
-    }
-    else if (authToken && authToken.includes('::')) {
+    } else if (authToken && authToken.includes('::')) {
       authToken = authToken.split('::')[1];
     }
 
-    const checksum = req.headers['x-cursor-checksum'] 
-      ?? process.env['x-cursor-checksum'] 
+    if (!authToken || typeof authToken !== 'string' || authToken.trim().length === 0) {
+      return res.status(401).json({ error: 'Invalid or missing token for upstream' });
+    }
+
+    const checksum = req.headers['x-cursor-checksum']
+      ?? process.env['x-cursor-checksum']
       ?? generateCursorChecksum(authToken.trim());
-    //const cursorClientVersion = "0.45.11"
     const cursorClientVersion = "0.50.4";
 
-    const availableModelsResponse = await fetch("https://api2.cursor.sh/aiserver.v1.AiService/AvailableModels", {
-      method: 'POST',
-      headers: {
-        'accept-encoding': 'gzip',
-        'authorization': `Bearer ${authToken}`,
-        'connect-protocol-version': '1',
-        'content-type': 'application/proto',
-        'user-agent': 'connect-es/1.6.1',
-        'x-cursor-checksum': checksum,
-        'x-cursor-client-version': cursorClientVersion,
-        'x-cursor-config-version': uuidv4(),
-        'x-cursor-timezone': 'Asia/Tokyo',
-        'x-ghost-mode': 'true',
-        'Host': 'api2.cursor.sh',
-      },
-    })
+    // 代理与直连调度器（当未启用TLS代理时生效）
+    const dispatcher = config.proxy && config.proxy.enabled
+      ? new ProxyAgent(config.proxy.url, { allowH2: true })
+      : new Agent({ allowH2: true });
+
+    // 根据配置决定是否使用TLS代理
+    const useTlsProxy = process.env.USE_TLS_PROXY === 'true';
+
+    const upstreamUrl = 'https://api2.cursor.sh/aiserver.v1.AiService/AvailableModels';
+    const upstreamHeaders = {
+      'accept-encoding': 'gzip',
+      'authorization': `Bearer ${authToken}`,
+      'connect-protocol-version': '1',
+      'content-type': 'application/proto',
+      'user-agent': 'connect-es/1.6.1',
+      'x-cursor-checksum': checksum,
+      'x-cursor-client-version': cursorClientVersion,
+      'x-cursor-config-version': uuidv4(),
+      'x-cursor-timezone': 'Asia/Tokyo',
+      'x-ghost-mode': 'true',
+      'Host': 'api2.cursor.sh',
+    };
+
+    let availableModelsResponse;
+    try {
+      if (useTlsProxy) {
+        // 通过TLS代理（JA3指纹伪造代理）请求
+        logger.info('使用TLS代理服务器获取可用模型');
+        const proxyPayload = {
+          url: upstreamUrl,
+          method: 'POST',
+          headers: upstreamHeaders,
+          // AvailableModels可不带body
+          stream: false
+        };
+        const proxyResp = await fetch('http://localhost:8080/proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(proxyPayload)
+        });
+        availableModelsResponse = proxyResp;
+      } else {
+        // 直接请求（可选走HTTP代理）
+        availableModelsResponse = await fetch(upstreamUrl, {
+          method: 'POST',
+          headers: upstreamHeaders,
+          dispatcher
+        });
+      }
+    } catch (fetchErr) {
+      // 更详细的错误日志
+      logger.error(`获取可用模型失败: ${fetchErr.message}${fetchErr.cause && fetchErr.cause.code ? ` (${fetchErr.cause.code})` : ''}`);
+      return res.status(502).json({ error: 'Upstream fetch failed' });
+    }
+
     const data = await availableModelsResponse.arrayBuffer();
     const buffer = Buffer.from(data);
-    try{
+    try {
       const models = $root.AvailableModelsResponse.decode(buffer).models;
 
       return res.json({
-        object: "list",
+        object: 'list',
         data: models.map(model => ({
           id: model.name,
           created: Date.now(),
           object: 'model',
           owned_by: 'cursor'
         }))
-      })
-    } catch (error) {
+      });
+    } catch (decodeError) {
+      // 当非proto响应（如401/403）时，按文本返回更友好的错误
       const text = buffer.toString('utf-8');
-      throw new Error(text);      
+      logger.error(`解析可用模型响应失败: ${decodeError.message}. 响应文本: ${text}`);
+      return res.status(502).json({ error: text || 'Bad upstream response' });
     }
-  }
-  catch (error) {
+  } catch (error) {
     logger.error(error);
     return res.status(500).json({
       error: 'Internal server error',
     });
   }
-})
+});
 
 
 router.post('/chat/completions', async (req, res) => {

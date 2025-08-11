@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI 模型 - Cursor To OpenAI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="models.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#007aff">
+    <script src="theme.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <div class="navbar">
+            <div class="nav-brand">
+                <i class="fas fa-brain"></i>
+                <h1>AI 模型中心</h1>
+            </div>
+            <div class="nav-actions">
+                <a href="/dashboard.html" class="nav-btn">
+                    <i class="fas fa-chart-pie"></i> 仪表板
+                </a>
+                <a href="/" class="nav-btn">
+                    <i class="fas fa-cog"></i> 管理
+                </a>
+                <a href="/docs.html" class="nav-btn">
+                    <i class="fas fa-book"></i> 文档
+                </a>
+                <button id="logoutBtn" class="nav-btn danger">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </button>
+            </div>
+        </div>
+
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1>探索我们的 AI 模型</h1>
+                <p>选择最适合您需求的人工智能模型，体验最前沿的AI技术</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="testAllModels()">
+                    <i class="fas fa-vial"></i> 测试所有模型
+                </button>
+                <button class="btn btn-secondary" onclick="refreshModels()">
+                    <i class="fas fa-sync-alt"></i> 刷新列表
+                </button>
+            </div>
+        </div>
+
+        <!-- 模型筛选器 -->
+        <div class="model-filters">
+            <div class="filter-group">
+                <label>模型类型:</label>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">全部</button>
+                    <button class="filter-btn" data-filter="chat">对话模型</button>
+                    <button class="filter-btn" data-filter="code">代码模型</button>
+                    <button class="filter-btn" data-filter="reasoning">推理模型</button>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label>提供商:</label>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-provider="all">全部</button>
+                    <button class="filter-btn" data-provider="anthropic">Anthropic</button>
+                    <button class="filter-btn" data-provider="openai">OpenAI</button>
+                    <button class="filter-btn" data-provider="cursor">Cursor</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模型网格 -->
+        <div class="models-grid" id="modelsGrid">
+            <!-- 模型卡片将通过JavaScript动态生成 -->
+        </div>
+
+        <!-- 加载状态 -->
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p>正在加载模型信息...</p>
+        </div>
+
+        <!-- 模型详情模态框 -->
+        <div id="modelModal" class="modal">
+            <div class="modal-content model-modal-content">
+                <span class="close" id="closeModal">&times;</span>
+                
+                <div class="model-detail-header">
+                    <div class="model-info">
+                        <div class="model-avatar">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="model-basic-info">
+                            <h2 id="modalModelName">模型名称</h2>
+                            <p id="modalModelProvider">提供商</p>
+                            <div class="model-tags">
+                                <span class="tag" id="modalModelType">类型</span>
+                                <span class="tag" id="modalModelStatus">状态</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="model-actions">
+                        <button class="btn btn-primary" onclick="testCurrentModel()">
+                            <i class="fas fa-play"></i> 测试模型
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyModelEndpoint()">
+                            <i class="fas fa-copy"></i> 复制端点
+                        </button>
+                    </div>
+                </div>
+
+                <div class="model-detail-content">
+                    <div class="detail-tabs">
+                        <button class="tab-btn active" onclick="switchTab('overview')">概述</button>
+                        <button class="tab-btn" onclick="switchTab('specs')">规格参数</button>
+                        <button class="tab-btn" onclick="switchTab('pricing')">价格信息</button>
+                        <button class="tab-btn" onclick="switchTab('examples')">使用示例</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <!-- 概述标签页 -->
+                        <div id="overview" class="tab-panel active">
+                            <div class="overview-grid">
+                                <div class="overview-section">
+                                    <h3>模型描述</h3>
+                                    <p id="modalModelDescription">这是一个强大的AI模型...</p>
+                                </div>
+                                
+                                <div class="overview-section">
+                                    <h3>主要特性</h3>
+                                    <ul id="modalModelFeatures">
+                                        <li>高质量文本生成</li>
+                                        <li>多语言支持</li>
+                                        <li>上下文理解</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="overview-section">
+                                    <h3>适用场景</h3>
+                                    <div class="use-cases" id="modalUseCases">
+                                        <span class="use-case-tag">对话系统</span>
+                                        <span class="use-case-tag">内容创作</span>
+                                        <span class="use-case-tag">代码生成</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 规格参数标签页 -->
+                        <div id="specs" class="tab-panel">
+                            <div class="specs-grid">
+                                <div class="spec-item">
+                                    <label>上下文长度</label>
+                                    <value id="modalContextLength">200,000 tokens</value>
+                                </div>
+                                
+                                <div class="spec-item">
+                                    <label>输出长度</label>
+                                    <value id="modalOutputLength">8,192 tokens</value>
+                                </div>
+                                
+                                <div class="spec-item">
+                                    <label>支持的语言</label>
+                                    <value id="modalLanguages">中文、英文、日文等</value>
+                                </div>
+                                
+                                <div class="spec-item">
+                                    <label>训练截止时间</label>
+                                    <value id="modalTrainingCutoff">2024年4月</value>
+                                </div>
+                                
+                                <div class="spec-item">
+                                    <label>API版本</label>
+                                    <value id="modalApiVersion">v1</value>
+                                </div>
+                                
+                                <div class="spec-item">
+                                    <label>响应时间</label>
+                                    <value id="modalResponseTime">~2-5秒</value>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 价格信息标签页 -->
+                        <div id="pricing" class="tab-panel">
+                            <div class="pricing-info">
+                                <div class="pricing-note">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>本服务通过 Cursor 代理，实际费用由 Cursor 平台计算。以下为参考价格。</p>
+                                </div>
+                                
+                                <div class="pricing-table">
+                                    <div class="pricing-row">
+                                        <span class="pricing-label">输入 Token</span>
+                                        <span class="pricing-value" id="modalInputPrice">$0.003 / 1K tokens</span>
+                                    </div>
+                                    
+                                    <div class="pricing-row">
+                                        <span class="pricing-label">输出 Token</span>
+                                        <span class="pricing-value" id="modalOutputPrice">$0.015 / 1K tokens</span>
+                                    </div>
+                                    
+                                    <div class="pricing-row">
+                                        <span class="pricing-label">缓存命中</span>
+                                        <span class="pricing-value">$0.0015 / 1K tokens</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 使用示例标签页 -->
+                        <div id="examples" class="tab-panel">
+                            <div class="examples-section">
+                                <h3>API调用示例</h3>
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span>cURL</span>
+                                        <button class="copy-code-btn" onclick="copyCode('curl-example')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <pre id="curl-example"><code>curl -X POST "http://localhost:3010/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-3-sonnet",
+    "messages": [
+      {
+        "role": "user",
+        "content": "你好，请介绍一下自己"
+      }
+    ],
+    "max_tokens": 1000,
+    "temperature": 0.7
+  }'</code></pre>
+                                </div>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span>Python</span>
+                                        <button class="copy-code-btn" onclick="copyCode('python-example')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <pre id="python-example"><code>import requests
+
+url = "http://localhost:3010/v1/chat/completions"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer YOUR_API_KEY"
+}
+
+data = {
+    "model": "claude-3-sonnet",
+    "messages": [
+        {
+            "role": "user",
+            "content": "你好，请介绍一下自己"
+        }
+    ],
+    "max_tokens": 1000,
+    "temperature": 0.7
+}
+
+response = requests.post(url, headers=headers, json=data)
+print(response.json())</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模型测试结果模态框 -->
+        <div id="testModal" class="modal">
+            <div class="modal-content test-modal-content">
+                <span class="close" onclick="closeTestModal()">&times;</span>
+                
+                <div class="test-header">
+                    <h2><i class="fas fa-vial"></i> 模型测试结果</h2>
+                    <div class="test-status" id="testStatus">
+                        <i class="fas fa-spinner fa-spin"></i> 测试中...
+                    </div>
+                </div>
+                
+                <div class="test-content">
+                    <div class="test-info">
+                        <div class="test-model">
+                            <label>测试模型:</label>
+                            <span id="testModelName">-</span>
+                        </div>
+                        <div class="test-time">
+                            <label>测试时间:</label>
+                            <span id="testTime">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="test-messages">
+                        <div class="test-message user">
+                            <div class="message-header">
+                                <i class="fas fa-user"></i>
+                                <span>用户</span>
+                            </div>
+                            <div class="message-content">
+                                你好，请简单介绍一下自己，并说明你的主要功能。
+                            </div>
+                        </div>
+                        
+                        <div class="test-message assistant" id="testResponse">
+                            <div class="message-header">
+                                <i class="fas fa-robot"></i>
+                                <span>AI助手</span>
+                            </div>
+                            <div class="message-content" id="testResponseContent">
+                                <div class="loading-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="test-metrics" id="testMetrics" style="display: none;">
+                        <div class="metric-item">
+                            <label>响应时间</label>
+                            <value id="responseTimeMetric">-</value>
+                        </div>
+                        <div class="metric-item">
+                            <label>Token数量</label>
+                            <value id="tokenCountMetric">-</value>
+                        </div>
+                        <div class="metric-item">
+                            <label>状态码</label>
+                            <value id="statusCodeMetric">-</value>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主题切换按钮 -->
+    <div class="theme-switch" onclick="toggleTheme()">
+        <i class="fas fa-moon theme-icon"></i>
+    </div>
+
+    <!-- 通知容器 -->
+    <div class="notification-container"></div>
+
+    <script src="models.js"></script>
+</body>
+</html>

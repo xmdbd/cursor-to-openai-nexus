@@ -879,6 +879,27 @@ progress::-webkit-progress-value {
   transform: translateY(-2px);
 }
 
+/* 为header-card内的链接添加特殊样式 */
+.header-card a {
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.header-card a:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
 .header-card button.danger {
   background-color: #ff3b30;
   color: white;
@@ -896,6 +917,16 @@ progress::-webkit-progress-value {
 }
 
 [data-theme="dark"] .header-card button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .header-card a {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .header-card a:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -1267,4 +1298,73 @@ input, textarea, select {
   transition: background-color 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
               border-color 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
               box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-} 
+}
+
+/* 通知系统样式 */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notification {
+  background: var(--ios-card-background);
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  animation: slideIn 0.3s ease;
+}
+
+.notification-success {
+  border-left: 4px solid var(--ios-green);
+}
+
+.notification-error {
+  border-left: 4px solid var(--ios-red);
+}
+
+.notification-info {
+  border-left: 4px solid var(--ios-blue);
+}
+
+.notification i {
+  color: inherit;
+}
+
+.notification span {
+  flex: 1;
+  color: var(--ios-text-primary);
+}
+
+.notification button {
+  background: none;
+  border: none;
+  color: var(--ios-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.notification button:hover {
+  background: rgba(142, 142, 147, 0.1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

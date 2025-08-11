@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cursor To OpenAI - 仪表板</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#007aff">
+    <script src="theme.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <div class="navbar">
+            <div class="nav-brand">
+                <i class="fas fa-chart-pie"></i>
+                <h1>AI 模型服务仪表板</h1>
+            </div>
+            <div class="nav-actions">
+                <a href="/" class="nav-btn">
+                    <i class="fas fa-cog"></i> 管理
+                </a>
+                <a href="/models.html" class="nav-btn">
+                    <i class="fas fa-brain"></i> 模型
+                </a>
+                <a href="/docs.html" class="nav-btn">
+                    <i class="fas fa-book"></i> 文档
+                </a>
+                <button id="logoutBtn" class="nav-btn danger">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </button>
+            </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalApiKeys">--</div>
+                    <div class="stat-label">API Keys</div>
+                </div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i> +12%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-cookie-bite"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalCookies">--</div>
+                    <div class="stat-label">可用 Cookies</div>
+                </div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i> +5%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalModels">--</div>
+                    <div class="stat-label">可用模型</div>
+                </div>
+                <div class="stat-trend neutral">
+                    <i class="fas fa-minus"></i> 0%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="invalidCookies">--</div>
+                    <div class="stat-label">无效 Cookies</div>
+                </div>
+                <div class="stat-trend negative">
+                    <i class="fas fa-arrow-down"></i> -8%
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="dashboard-grid">
+            <!-- 模型使用情况 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-pie"></i> 模型使用分布</h2>
+                    <div class="card-actions">
+                        <button class="icon-btn" onclick="refreshModelUsage()">
+                            <i class="fas fa-refresh"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <canvas id="modelUsageChart"></canvas>
+                </div>
+            </div>
+
+            <!-- API调用趋势 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> API 调用趋势</h2>
+                    <div class="card-actions">
+                        <select id="timeRange">
+                            <option value="7d">最近7天</option>
+                            <option value="30d">最近30天</option>
+                            <option value="90d">最近90天</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <canvas id="apiCallsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 系统状态 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-server"></i> 系统状态</h2>
+                    <div class="status-indicator online" id="systemStatus">
+                        <i class="fas fa-circle"></i> 正常运行
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="system-metrics">
+                        <div class="metric">
+                            <div class="metric-label">响应时间</div>
+                            <div class="metric-value" id="responseTime">--ms</div>
+                            <div class="metric-bar">
+                                <div class="metric-progress" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric">
+                            <div class="metric-label">成功率</div>
+                            <div class="metric-value" id="successRate">--%</div>
+                            <div class="metric-bar">
+                                <div class="metric-progress" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric">
+                            <div class="metric-label">Cookie 健康度</div>
+                            <div class="metric-value" id="cookieHealth">--%</div>
+                            <div class="metric-bar">
+                                <div class="metric-progress" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 最近活动 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clock"></i> 最近活动</h2>
+                    <div class="card-actions">
+                        <button class="icon-btn" onclick="loadRecentActivity()">
+                            <i class="fas fa-refresh"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="activity-list" id="activityList">
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">添加了新的 API Key</div>
+                                <div class="activity-time">2分钟前</div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">刷新了 Cookie</div>
+                                <div class="activity-time">15分钟前</div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">调用了 Claude-3-Sonnet 模型</div>
+                                <div class="activity-time">1小时前</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快速操作 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-bolt"></i> 快速操作</h2>
+                </div>
+                <div class="card-content">
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="testAllModels()">
+                            <i class="fas fa-vial"></i>
+                            <span>测试所有模型</span>
+                        </button>
+                        
+                        <button class="quick-action-btn" onclick="refreshAllCookies()">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>刷新 Cookies</span>
+                        </button>
+                        
+                        <button class="quick-action-btn" onclick="exportData()">
+                            <i class="fas fa-download"></i>
+                            <span>导出数据</span>
+                        </button>
+                        
+                        <button class="quick-action-btn" onclick="viewLogs()">
+                            <i class="fas fa-file-alt"></i>
+                            <span>查看日志</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主题切换按钮 -->
+    <div class="theme-switch" onclick="toggleTheme()">
+        <i class="fas fa-moon theme-icon"></i>
+    </div>
+
+    <!-- 侧边导航 -->
+    <div class="side-nav-trigger">
+        <div class="trigger-dot"></div>
+    </div>
+    <div class="side-nav-menu">
+        <div class="side-nav-content">
+            <!-- 目录项将通过JS动态生成 -->
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

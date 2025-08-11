@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>API 文档 - Cursor To OpenAI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="docs.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#007aff">
+    <script src="theme.js"></script>
+</head>
+<body>
+    <div class="docs-layout">
+        <!-- 侧边栏 -->
+        <div class="docs-sidebar">
+            <div class="sidebar-header">
+                <a href="/dashboard.html" class="brand-link">
+                    <i class="fas fa-book"></i>
+                    <span>API 文档</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-title">快速开始</div>
+                    <a href="#introduction" class="nav-link active">简介</a>
+                    <a href="#authentication" class="nav-link">身份验证</a>
+                    <a href="#quickstart" class="nav-link">快速开始</a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">API 参考</div>
+                    <a href="#models" class="nav-link">模型</a>
+                    <a href="#chat" class="nav-link">聊天补全</a>
+                    <a href="#streaming" class="nav-link">流式响应</a>
+                    <a href="#errors" class="nav-link">错误处理</a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">SDK & 工具</div>
+                    <a href="#python-sdk" class="nav-link">Python SDK</a>
+                    <a href="#javascript-sdk" class="nav-link">JavaScript SDK</a>
+                    <a href="#curl-examples" class="nav-link">cURL 示例</a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">资源</div>
+                    <a href="#rate-limits" class="nav-link">请求限制</a>
+                    <a href="#best-practices" class="nav-link">最佳实践</a>
+                    <a href="#changelog" class="nav-link">更新日志</a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="quick-links">
+                    <a href="/dashboard.html" class="quick-link">
+                        <i class="fas fa-chart-pie"></i> 仪表板
+                    </a>
+                    <a href="/models.html" class="quick-link">
+                        <i class="fas fa-brain"></i> 模型
+                    </a>
+                    <a href="/" class="quick-link">
+                        <i class="fas fa-cog"></i> 管理
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主要内容 -->
+        <div class="docs-content">
+            <!-- 顶部导航 -->
+            <div class="docs-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <a href="/dashboard.html">首页</a>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>API 文档</span>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-moon theme-icon"></i>
+                    </button>
+                    <button id="logoutBtn" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 文档主体 -->
+            <div class="docs-body">
+                <!-- 简介 -->
+                <section id="introduction" class="doc-section">
+                    <h1>Cursor To OpenAI API 文档</h1>
+                    <p class="lead">
+                        欢迎使用 Cursor To OpenAI API！我们提供了与 OpenAI 完全兼容的 API 接口，
+                        让您可以轻松地将 Cursor 的 AI 模型集成到您的应用程序中。
+                    </p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <h3>OpenAI 兼容</h3>
+                            <p>完全兼容 OpenAI API 格式，无需修改现有代码</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3>多种模型</h3>
+                            <p>支持 Claude、Cursor 等多种先进的 AI 模型</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-stream"></i>
+                            </div>
+                            <h3>流式响应</h3>
+                            <p>支持实时流式响应，提供更好的用户体验</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3>安全可靠</h3>
+                            <p>企业级安全保障，稳定的服务可用性</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 身份验证 -->
+                <section id="authentication" class="doc-section">
+                    <h2>身份验证</h2>
+                    <p>
+                        Cursor To OpenAI API 使用 API 密钥进行身份验证。您需要在每个请求的 Authorization 标头中包含您的 API 密钥。
+                    </p>
+                    
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>授权标头格式</span>
+                            <button class="copy-btn" onclick="copyCode('auth-header')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="auth-header"><code class="language-http">Authorization: Bearer YOUR_API_KEY</code></pre>
+                    </div>
+                    
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <h4>获取 API 密钥</h4>
+                            <p>请前往 <a href="/">管理页面</a> 添加和管理您的 API 密钥。每个 API 密钥都可以配置多个 Cursor Cookie。</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 快速开始 -->
+                <section id="quickstart" class="doc-section">
+                    <h2>快速开始</h2>
+                    <p>以下是一个简单的示例，展示如何使用我们的 API 进行聊天补全：</p>
+                    
+                    <div class="code-tabs">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" onclick="switchCodeTab('curl')">cURL</button>
+                            <button class="tab-btn" onclick="switchCodeTab('python')">Python</button>
+                            <button class="tab-btn" onclick="switchCodeTab('javascript')">JavaScript</button>
+                        </div>
+                        
+                        <div class="tab-content">
+                            <div id="curl-tab" class="tab-panel active">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span>cURL 示例</span>
+                                        <button class="copy-btn" onclick="copyCode('curl-quickstart')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <pre id="curl-quickstart"><code class="language-bash">curl -X POST "http://localhost:3010/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-3-sonnet",
+    "messages": [
+      {
+        "role": "user",
+        "content": "你好，世界！"
+      }
+    ],
+    "max_tokens": 100,
+    "temperature": 0.7
+  }'</code></pre>
+                                </div>
+                            </div>
+                            
+                            <div id="python-tab" class="tab-panel">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span>Python 示例</span>
+                                        <button class="copy-btn" onclick="copyCode('python-quickstart')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <pre id="python-quickstart"><code class="language-python">import requests
+
+url = "http://localhost:3010/v1/chat/completions"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer YOUR_API_KEY"
+}
+
+data = {
+    "model": "claude-3-sonnet",
+    "messages": [
+        {
+            "role": "user",
+            "content": "你好，世界！"
+        }
+    ],
+    "max_tokens": 100,
+    "temperature": 0.7
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+print(result["choices"][0]["message"]["content"])</code></pre>
+                                </div>
+                            </div>
+                            
+                            <div id="javascript-tab" class="tab-panel">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span>JavaScript 示例</span>
+                                        <button class="copy-btn" onclick="copyCode('js-quickstart')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <pre id="js-quickstart"><code class="language-javascript">const response = await fetch('http://localhost:3010/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    model: 'claude-3-sonnet',
+    messages: [
+      {
+        role: 'user',
+        content: '你好，世界！'
+      }
+    ],
+    max_tokens: 100,
+    temperature: 0.7
+  })
+});
+
+const result = await response.json();
+console.log(result.choices[0].message.content);</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 模型 -->
+                <section id="models" class="doc-section">
+                    <h2>模型</h2>
+                    <p>获取当前可用的模型列表。</p>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span class="path">/v1/models</span>
+                        </div>
+                    </div>
+                    
+                    <h3>响应示例</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>200 OK</span>
+                            <button class="copy-btn" onclick="copyCode('models-response')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="models-response"><code class="language-json">{
+  "object": "list",
+  "data": [
+    {
+      "id": "claude-3-sonnet",
+      "created": 1677610602,
+      "object": "model",
+      "owned_by": "cursor"
+    },
+    {
+      "id": "claude-3-haiku",
+      "created": 1677610602,
+      "object": "model",
+      "owned_by": "cursor"
+    }
+  ]
+}</code></pre>
+                    </div>
+                    
+                    <h3>可用模型</h3>
+                    <div class="models-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>模型 ID</th>
+                                    <th>模型名称</th>
+                                    <th>上下文长度</th>
+                                    <th>描述</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>claude-3-5-sonnet</code></td>
+                                    <td>Claude-3.5-Sonnet</td>
+                                    <td>200K tokens</td>
+                                    <td>最新的 Claude 模型，性能卓越</td>
+                                </tr>
+                                <tr>
+                                    <td><code>claude-3-sonnet</code></td>
+                                    <td>Claude-3-Sonnet</td>
+                                    <td>200K tokens</td>
+                                    <td>平衡性能和成本的通用模型</td>
+                                </tr>
+                                <tr>
+                                    <td><code>claude-3-haiku</code></td>
+                                    <td>Claude-3-Haiku</td>
+                                    <td>200K tokens</td>
+                                    <td>快速且经济的模型</td>
+                                </tr>
+                                <tr>
+                                    <td><code>claude-3-opus</code></td>
+                                    <td>Claude-3-Opus</td>
+                                    <td>200K tokens</td>
+                                    <td>最强大的推理能力</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <!-- 聊天补全 -->
+                <section id="chat" class="doc-section">
+                    <h2>聊天补全</h2>
+                    <p>创建一个聊天补全响应。这是主要的 API 端点，用于与模型进行对话。</p>
+                    
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="path">/v1/chat/completions</span>
+                        </div>
+                    </div>
+                    
+                    <h3>请求参数</h3>
+                    <div class="params-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>参数</th>
+                                    <th>类型</th>
+                                    <th>必需</th>
+                                    <th>描述</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>model</code></td>
+                                    <td>string</td>
+                                    <td>是</td>
+                                    <td>要使用的模型 ID</td>
+                                </tr>
+                                <tr>
+                                    <td><code>messages</code></td>
+                                    <td>array</td>
+                                    <td>是</td>
+                                    <td>对话消息列表</td>
+                                </tr>
+                                <tr>
+                                    <td><code>max_tokens</code></td>
+                                    <td>integer</td>
+                                    <td>否</td>
+                                    <td>生成的最大 token 数量</td>
+                                </tr>
+                                <tr>
+                                    <td><code>temperature</code></td>
+                                    <td>number</td>
+                                    <td>否</td>
+                                    <td>采样温度，0-2 之间，默认 0.7</td>
+                                </tr>
+                                <tr>
+                                    <td><code>stream</code></td>
+                                    <td>boolean</td>
+                                    <td>否</td>
+                                    <td>是否启用流式响应，默认 false</td>
+                                </tr>
+                                <tr>
+                                    <td><code>stop</code></td>
+                                    <td>string/array</td>
+                                    <td>否</td>
+                                    <td>停止生成的字符序列</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3>消息格式</h3>
+                    <p>每个消息对象应包含以下字段：</p>
+                    
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>消息对象</span>
+                            <button class="copy-btn" onclick="copyCode('message-format')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="message-format"><code class="language-json">{
+  "role": "user",  // "system", "user", "assistant"
+  "content": "Hello, how are you?"
+}</code></pre>
+                    </div>
+                    
+                    <h3>请求示例</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>请求体</span>
+                            <button class="copy-btn" onclick="copyCode('chat-request')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="chat-request"><code class="language-json">{
+  "model": "claude-3-sonnet",
+  "messages": [
+    {
+      "role": "system",
+      "content": "你是一个有帮助的AI助手。"
+    },
+    {
+      "role": "user",
+      "content": "请解释什么是机器学习。"
+    }
+  ],
+  "max_tokens": 500,
+  "temperature": 0.7,
+  "stream": false
+}</code></pre>
+                    </div>
+                    
+                    <h3>响应示例</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>200 OK</span>
+                            <button class="copy-btn" onclick="copyCode('chat-response')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="chat-response"><code class="language-json">{
+  "id": "chatcmpl-7QyqpwdfhqwajicIEznoc6Q47XAyW",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "claude-3-sonnet",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "机器学习是人工智能的一个子领域..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 56,
+    "completion_tokens": 31,
+    "total_tokens": 87
+  }
+}</code></pre>
+                    </div>
+                </section>
+                
+                <!-- 流式响应 -->
+                <section id="streaming" class="doc-section">
+                    <h2>流式响应</h2>
+                    <p>当设置 <code>stream: true</code> 时，API 将返回流式响应，允许您实时接收生成的内容。</p>
+                    
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>流式响应示例</span>
+                            <button class="copy-btn" onclick="copyCode('streaming-response')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="streaming-response"><code class="language-text">data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190,"model":"claude-3-sonnet","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190,"model":"claude-3-sonnet","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190,"model":"claude-3-sonnet","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190,"model":"claude-3-sonnet","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]</code></pre>
+                    </div>
+                    
+                    <h3>处理流式响应</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>JavaScript 流式处理</span>
+                            <button class="copy-btn" onclick="copyCode('streaming-js')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="streaming-js"><code class="language-javascript">const response = await fetch('/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    model: 'claude-3-sonnet',
+    messages: [{ role: 'user', content: 'Hello!' }],
+    stream: true
+  })
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  
+  const chunk = decoder.decode(value);
+  const lines = chunk.split('\n');
+  
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      const data = line.slice(6);
+      if (data === '[DONE]') return;
+      
+      try {
+        const parsed = JSON.parse(data);
+        const content = parsed.choices[0]?.delta?.content;
+        if (content) {
+          console.log(content);
+        }
+      } catch (e) {
+        // 忽略解析错误
+      }
+    }
+  }
+}</code></pre>
+                    </div>
+                </section>
+                
+                <!-- 错误处理 -->
+                <section id="errors" class="doc-section">
+                    <h2>错误处理</h2>
+                    <p>API 使用标准的 HTTP 状态码来表示成功或失败。所有错误响应都包含一个错误对象。</p>
+                    
+                    <h3>错误响应格式</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>错误响应</span>
+                            <button class="copy-btn" onclick="copyCode('error-response')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="error-response"><code class="language-json">{
+  "error": {
+    "message": "Invalid API key provided",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}</code></pre>
+                    </div>
+                    
+                    <h3>HTTP 状态码</h3>
+                    <div class="error-codes">
+                        <div class="error-code">
+                            <div class="status-badge status-200">200</div>
+                            <div class="error-info">
+                                <h4>OK</h4>
+                                <p>请求成功</p>
+                            </div>
+                        </div>
+                        
+                        <div class="error-code">
+                            <div class="status-badge status-400">400</div>
+                            <div class="error-info">
+                                <h4>Bad Request</h4>
+                                <p>请求格式不正确或缺少必需参数</p>
+                            </div>
+                        </div>
+                        
+                        <div class="error-code">
+                            <div class="status-badge status-401">401</div>
+                            <div class="error-info">
+                                <h4>Unauthorized</h4>
+                                <p>API 密钥无效或缺失</p>
+                            </div>
+                        </div>
+                        
+                        <div class="error-code">
+                            <div class="status-badge status-429">429</div>
+                            <div class="error-info">
+                                <h4>Too Many Requests</h4>
+                                <p>请求频率超出限制</p>
+                            </div>
+                        </div>
+                        
+                        <div class="error-code">
+                            <div class="status-badge status-500">500</div>
+                            <div class="error-info">
+                                <h4>Internal Server Error</h4>
+                                <p>服务器内部错误</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 请求限制 -->
+                <section id="rate-limits" class="doc-section">
+                    <h2>请求限制</h2>
+                    <p>为了确保服务的稳定性和公平使用，我们实施了以下请求限制：</p>
+                    
+                    <div class="limits-grid">
+                        <div class="limit-card">
+                            <h3>每分钟请求数</h3>
+                            <div class="limit-value">60 次</div>
+                            <p>每个 API 密钥每分钟最多 60 次请求</p>
+                        </div>
+                        
+                        <div class="limit-card">
+                            <h3>每小时请求数</h3>
+                            <div class="limit-value">3,600 次</div>
+                            <p>每个 API 密钥每小时最多 3,600 次请求</p>
+                        </div>
+                        
+                        <div class="limit-card">
+                            <h3>并发请求数</h3>
+                            <div class="limit-value">10 个</div>
+                            <p>每个 API 密钥最多 10 个并发请求</p>
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <h4>超出限制时</h4>
+                            <p>当您超出请求限制时，API 将返回 HTTP 429 状态码。建议实施指数退避策略来处理限制。</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 最佳实践 -->
+                <section id="best-practices" class="doc-section">
+                    <h2>最佳实践</h2>
+                    
+                    <div class="practices-grid">
+                        <div class="practice-item">
+                            <div class="practice-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <h3>API 密钥安全</h3>
+                            <ul>
+                                <li>将 API 密钥存储在环境变量中</li>
+                                <li>不要在前端代码中暴露密钥</li>
+                                <li>定期轮换 API 密钥</li>
+                                <li>为不同用途创建单独的密钥</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice-item">
+                            <div class="practice-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <h3>性能优化</h3>
+                            <ul>
+                                <li>使用流式响应提升用户体验</li>
+                                <li>适当设置 max_tokens 限制</li>
+                                <li>根据用途选择合适的模型</li>
+                                <li>实施请求缓存策略</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice-item">
+                            <div class="practice-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3>错误处理</h3>
+                            <ul>
+                                <li>始终检查 HTTP 状态码</li>
+                                <li>实施重试机制和退避策略</li>
+                                <li>妥善处理网络超时</li>
+                                <li>记录错误信息用于调试</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice-item">
+                            <div class="practice-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3>代码质量</h3>
+                            <ul>
+                                <li>使用类型提示和验证</li>
+                                <li>编写单元测试</li>
+                                <li>实施日志记录</li>
+                                <li>文档化您的集成</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 更新日志 -->
+                <section id="changelog" class="doc-section">
+                    <h2>更新日志</h2>
+                    
+                    <div class="changelog">
+                        <div class="changelog-item">
+                            <div class="changelog-date">2024-03-15</div>
+                            <div class="changelog-content">
+                                <h3>v1.3.0</h3>
+                                <ul>
+                                    <li>添加了 Claude-3.5-Sonnet 模型支持</li>
+                                    <li>优化了流式响应性能</li>
+                                    <li>修复了并发请求时的稳定性问题</li>
+                                    <li>改进了错误消息的详细程度</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="changelog-item">
+                            <div class="changelog-date">2024-02-28</div>
+                            <div class="changelog-content">
+                                <h3>v1.2.0</h3>
+                                <ul>
+                                    <li>新增 Cookie 自动刷新功能</li>
+                                    <li>添加了请求限制机制</li>
+                                    <li>优化了 API 响应时间</li>
+                                    <li>修复了已知的安全漏洞</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="changelog-item">
+                            <div class="changelog-date">2024-01-10</div>
+                            <div class="changelog-content">
+                                <h3>v1.1.0</h3>
+                                <ul>
+                                    <li>初始版本发布</li>
+                                    <li>支持 Claude-3 系列模型</li>
+                                    <li>实现 OpenAI 兼容 API</li>
+                                    <li>添加流式响应支持</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 浮动操作按钮 -->
+    <div class="floating-actions">
+        <button class="fab" onclick="scrollToTop()">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+    
+    <script src="docs.js"></script>
+</body>
+</html>
